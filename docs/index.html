@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Origami</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #334155;
+    --accent: #38bdf8;
+    --accent-2: #0ea5e9;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+    --warn: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(90deg, #0ea5e9 0%, #1e40af 100%);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    z-index: 10;
+  }
+  header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  header .logo {
+    width: 28px; height: 28px;
+    background: #fff;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0ea5e9;
+    font-weight: 900;
+    font-size: 16px;
+  }
+  header .actions { display: flex; gap: 10px; }
+  header button {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+  header button:hover { background: rgba(255,255,255,0.3); }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; min-height: 0; }
+
+  /* SIDEBAR */
+  aside {
+    width: 320px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+    flex-shrink: 0;
+  }
+  aside::-webkit-scrollbar { width: 8px; }
+  aside::-webkit-scrollbar-thumb { background: var(--panel-2); border-radius: 4px; }
+
+  .menu-group { margin-bottom: 4px; }
+  .menu-header {
+    padding: 12px 18px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .menu-header:hover { background: rgba(56, 189, 248, 0.08); }
+  .menu-header .arrow {
+    transition: transform 0.25s;
+    font-size: 11px;
+  }
+  .menu-group.collapsed .arrow { transform: rotate(-90deg); }
+  .menu-group.collapsed .menu-items { max-height: 0; }
+
+  .menu-note {
+    padding: 0 18px 8px;
+    font-size: 11px;
+    color: var(--warn);
+    font-style: italic;
+  }
+
+  .menu-items {
+    overflow: hidden;
+    max-height: 1000px;
+    transition: max-height 0.3s ease;
+  }
+
+  .menu-item {
+    padding: 11px 18px 11px 32px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .menu-item:hover {
+    background: rgba(56, 189, 248, 0.08);
+    border-left-color: var(--accent);
+  }
+  .menu-item.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .menu-item .icon { font-size: 14px; opacity: 0.7; }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .toolbar {
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .breadcrumb {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .breadcrumb strong {
+    color: var(--text);
+    margin-left: 6px;
+  }
+  .toolbar-actions { display: flex; gap: 8px; }
+  .btn {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .btn.primary { background: var(--accent-2); border-color: var(--accent-2); }
+  .btn.primary:hover { background: var(--accent); }
+
+  .content {
+    flex: 1;
+    position: relative;
+    background: #020617;
+    min-height: 0;
+  }
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .welcome {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 40px;
+    text-align: center;
+  }
+  .welcome h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .welcome p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 520px;
+    line-height: 1.6;
+  }
+  .welcome .hint {
+    margin-top: 24px;
+    padding: 14px 20px;
+    background: var(--panel);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text);
+    max-width: 520px;
+    text-align: left;
+  }
+
+  /* MOBILE */
+  .menu-toggle { display: none; }
+  @media (max-width: 768px) {
+    aside {
+      position: fixed;
+      top: 56px; bottom: 0; left: 0;
+      width: 280px;
+      transform: translateX(-100%);
+      transition: transform 0.3s;
+      z-index: 20;
+    }
+    aside.open { transform: translateX(0); }
+    .menu-toggle {
+      display: inline-flex;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>
+    <span class="logo">O</span>
+    Dashboard Origami
+  </h1>
+  <div class="actions">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰ Menú</button>
+    <button onclick="reloadFrame()" title="Recargar dashboard">⟳ Recargar</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside id="sidebar">
+
+    <div class="menu-group" data-group="latacunga">
+      <div class="menu-header" onclick="toggleGroup(this)">
+        <span>🏛️ ERP GAD Latacunga</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="menu-note">⚠️ Requiere VPN</div>
+      <div class="menu-items">
+        <div class="menu-item"
+             data-url="http://172.16.84.117:3000/public/dashboard/de06ebca-e6e4-4fc8-bec3-6c32640fc5fc"
+             data-title="Tablero Institucional de Indicadores"
+             data-group="ERP GAD Latacunga"
+             onclick="loadDashboard(this)">
+          <span class="icon">📊</span>
+          Tablero Institucional de Indicadores
+        </div>
+        <div class="menu-item"
+             data-url="http://172.16.84.117:3000/public/dashboard/5bd713f3-9077-4670-8d9e-8ad7ed5824eb"
+             data-title="Ejecución POA"
+             data-group="ERP GAD Latacunga"
+             onclick="loadDashboard(this)">
+          <span class="icon">📈</span>
+          Ejecución POA
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-group" data-group="ibarra">
+      <div class="menu-header" onclick="toggleGroup(this)">
+        <span>🏛️ ERP GAD Ibarra</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="menu-items">
+        <div class="menu-item"
+             data-url="https://smartgob.ibarra.gob.ec/metabase/public/dashboard/32d8423b-db78-4590-abc2-435c5a09bb90"
+             data-title="Presupuesto Operativo"
+             data-group="ERP GAD Ibarra"
+             onclick="loadDashboard(this)">
+          <span class="icon">💰</span>
+          Presupuesto Operativo
+        </div>
+        <div class="menu-item"
+             data-url="https://smartgob.ibarra.gob.ec/metabase/public/dashboard/7457c1b9-8356-493e-a2d6-36cc5eb14bf5"
+             data-title="Planificación Institucional"
+             data-group="ERP GAD Ibarra"
+             onclick="loadDashboard(this)">
+          <span class="icon">🗂️</span>
+          Planificación Institucional
+        </div>
+        <div class="menu-item"
+             data-url="https://smartgob.ibarra.gob.ec/metabase/public/dashboard/fae70421-37b1-422d-989e-96f47cdd4b07"
+             data-title="Compras Públicas"
+             data-group="ERP GAD Ibarra"
+             onclick="loadDashboard(this)">
+          <span class="icon">🛒</span>
+          Compras Públicas
+        </div>
+        <div class="menu-item"
+             data-url="https://smartgob.ibarra.gob.ec/metabase/public/dashboard/5849467c-278a-467c-af63-82adc1d966cf"
+             data-title="Ventanilla Pública"
+             data-group="ERP GAD Ibarra"
+             onclick="loadDashboard(this)">
+          <span class="icon">🪟</span>
+          Ventanilla Pública
+        </div>
+        <div class="menu-item"
+             data-url="https://smartgob.ibarra.gob.ec/metabase/public/dashboard/ea8e815a-9828-4798-9574-421742dc9fb4"
+             data-title="Seguridad Ocupacional"
+             data-group="ERP GAD Ibarra"
+             onclick="loadDashboard(this)">
+          <span class="icon">🦺</span>
+          Seguridad Ocupacional
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="breadcrumb">
+        <span>Dashboard:</span>
+        <strong id="current-title">— Selecciona un dashboard —</strong>
+      </div>
+      <div class="toolbar-actions">
+        <a id="open-tab" class="btn" target="_blank" rel="noopener" style="display:none;">🔗 Abrir en pestaña</a>
+        <button id="fullscreen-btn" class="btn" onclick="toggleFullscreen()" style="display:none;">⛶ Pantalla completa</button>
+      </div>
+    </div>
+
+    <div class="content" id="content">
+      <div class="welcome" id="welcome">
+        <h2>Bienvenido a Dashboard Origami</h2>
+        <p>Centro unificado para visualizar los tableros de Metabase de los ERPs GAD Latacunga e Ibarra. Selecciona un dashboard del menú lateral para comenzar.</p>
+        <div class="hint">
+          <strong>💡 Tip:</strong> Los dashboards de <em>GAD Latacunga</em> requieren VPN activa. Si no carga, abre en pestaña externa con el botón 🔗.
+        </div>
+      </div>
+      <iframe id="frame" style="display:none;" title="Dashboard"></iframe>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  let currentUrl = '';
+
+  function toggleGroup(header) {
+    header.parentElement.classList.toggle('collapsed');
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  function loadDashboard(el) {
+    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+
+    const url = el.dataset.url;
+    const title = el.dataset.title;
+    const group = el.dataset.group;
+    currentUrl = url;
+
+    document.getElementById('current-title').textContent = group + ' › ' + title;
+    document.getElementById('welcome').style.display = 'none';
+
+    const frame = document.getElementById('frame');
+    frame.src = url;
+    frame.style.display = 'block';
+
+    const openTab = document.getElementById('open-tab');
+    openTab.href = url;
+    openTab.style.display = 'inline-flex';
+    document.getElementById('fullscreen-btn').style.display = 'inline-flex';
+
+    // Cerrar sidebar en móvil
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  }
+
+  function reloadFrame() {
+    if (currentUrl) {
+      document.getElementById('frame').src = currentUrl;
+    }
+  }
+
+  function toggleFullscreen() {
+    const frame = document.getElementById('frame');
+    if (frame.requestFullscreen) frame.requestFullscreen();
+    else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+  }
+</script>
+
+</body>
+</html>
